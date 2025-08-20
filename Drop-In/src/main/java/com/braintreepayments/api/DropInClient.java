@@ -1,9 +1,13 @@
 package com.braintreepayments.api;
 
+import static com.braintreepayments.api.DropInLifecycleObserver.DROP_IN_RESULT;
+
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -36,6 +40,9 @@ public class DropInClient {
 
     @VisibleForTesting
     DropInLifecycleObserver observer;
+
+    @VisibleForTesting
+    ActivityResultLauncher<DropInIntentData> activityLauncher;
 
     private static DropInClientParams createDefaultParams(Context context, String authorization, ClientTokenProvider clientTokenProvider, DropInRequest dropInRequest, FragmentActivity activity, Lifecycle lifecycle) {
 
@@ -98,7 +105,13 @@ public class DropInClient {
      * @param authorization a Tokenization Key authorization string
      */
     public DropInClient(FragmentActivity activity, String authorization) {
-        this(activity, activity.getLifecycle(), authorization, null);
+        DropInClientParams params = createDefaultParams(activity, authorization, null, null, activity, null);
+        this.dropInRequest = params.getDropInRequest();
+        this.braintreeClient = params.getBraintreeClient();
+        this.googlePayClient = params.getGooglePayClient();
+        this.paymentMethodClient = params.getPaymentMethodClient();
+        this.dropInSharedPreferences = params.getDropInSharedPreferences();
+        this.activityLauncher = activity.getActivityResultRegistry().register(DROP_IN_RESULT,new DropInActivityResultContract(), this::onDropInResult);
     }
 
     /**
@@ -289,6 +302,17 @@ public class DropInClient {
         });
     }
 
+    public void launchDropInRequest(DropInRequest request) {
+        getAuthorization((authorization, authorizationError) -> {
+            if (authorization != null){
+                @SuppressLint("RestrictedApi") DropInIntentData intentData = new DropInIntentData(request, authorization, braintreeClient.getSessionId());
+                activityLauncher.launch(intentData);
+            } else if (authorizationError != null && listener != null) {
+                listener.onDropInFailure(authorizationError);
+            }
+        });
+    }
+
     /**
      * Called to get a user's existing payment method, if any.
      * The payment method returned is not guaranteed to be the most recently added payment method.
@@ -373,5 +397,9 @@ public class DropInClient {
      */
     public void invalidateClientToken() {
         braintreeClient.invalidateClientToken();
+    }
+
+    public void unregisterDropInResult() {
+        activityLauncher.unregister();
     }
 }

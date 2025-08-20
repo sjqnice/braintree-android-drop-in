@@ -9,7 +9,7 @@ import androidx.lifecycle.LifecycleOwner;
 
 class DropInLifecycleObserver implements DefaultLifecycleObserver {
 
-    private static final String DROP_IN_RESULT = "com.braintreepayments.api.DropIn.RESULT";
+    static final String DROP_IN_RESULT = "com.braintreepayments.api.DropIn.RESULT";
 
     @VisibleForTesting
     DropInClient dropInClient;
