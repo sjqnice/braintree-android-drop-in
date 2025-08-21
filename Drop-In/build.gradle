@@ -1,12 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
-    id 'org.jetbrains.dokka'
 }
-
-def LOCALHOST_IP = System.properties['LOCALHOST_IP'] ?: '"10.0.2.2"';
-def GATEWAY_IP = System.properties['GATEWAY_IP'] ?: '"10.0.2.2"';
-def GATEWAY_PORT = System.properties['GATEWAY_PORT'] ?: '"3000"';
 
 android {
     compileSdkVersion rootProject.compileSdkVersion
@@ -23,11 +18,6 @@ android {
 
     resourcePrefix 'bt_'
 
-    packagingOptions {
-        exclude 'META-INF/maven/com.google.guava/guava/pom.properties'
-        exclude 'META-INF/maven/com.google.guava/guava/pom.xml'
-    }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -43,22 +33,6 @@ android {
         warning 'GradleCompatible', 'RestrictedApi'
         textReport true
         textOutput 'stdout'
-    }
-
-    sourceSets {
-        String sharedTestDir = 'src/sharedTest/java'
-        test {
-            java.srcDir sharedTestDir
-        }
-        androidTest {
-            java.srcDir sharedTestDir
-        }
-    }
-
-    buildTypes.debug { type ->
-        type.buildConfigField 'String', 'LOCALHOST_IP', LOCALHOST_IP
-        type.buildConfigField 'String', 'GATEWAY_IP', GATEWAY_IP
-        type.buildConfigField 'String', 'GATEWAY_PORT', GATEWAY_PORT
     }
 }
 
@@ -107,18 +81,10 @@ dependencies {
     androidTestImplementation 'org.mockito:mockito-core:5.2.0'
 }
 
-// region signing and publishing
-
-repositories {
-    mavenCentral()
-}
-
 project.ext.name = "drop-in"
 project.ext.pom_name = "drop-in"
 project.ext.group_id = "com.braintreepayments.api"
 project.ext.version = rootProject.version
 project.ext.pom_desc = "Drop-in payment form for Braintree\'s Android SDK. Integrate this library to add a readymade UI for your payments."
-
-apply from: rootProject.file("gradle/gradle-publish.gradle")
 
 // endregion

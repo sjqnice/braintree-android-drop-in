@@ -52,11 +52,6 @@ android {
         textReport true
         textOutput 'stdout'
     }
-
-    packagingOptions {
-        exclude 'META-INF/maven/com.google.guava/guava/pom.properties'
-        exclude 'META-INF/maven/com.google.guava/guava/pom.xml'
-    }
 }
 
 dependencies {
